@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Pomodoro Timer</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #ffffff, #4da3ff);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+/* CARD */
+.container {
+  text-align: center;
+  background: rgba(255,255,255,0.85);
+  padding: 30px;
+  border-radius: 20px;
+  width: 320px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+/* TIMER WRAPPER */
+.ring {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  margin: 20px auto;
+}
+
+/* SVG CIRCLE */
+svg {
+  transform: rotate(-90deg);
+}
+
+circle {
+  fill: none;
+  stroke-width: 12;
+  stroke-linecap: round;
+}
+
+/* BACK CIRCLE */
+.bg {
+  stroke: #e6e6e6;
+}
+
+/* PROGRESS CIRCLE */
+.progress {
+  stroke: #4da3ff;
+  stroke-dasharray: 565;
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 1s linear;
+}
+
+/* TIME TEXT */
+#timer {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 32px;
+  font-weight: bold;
+}
+
+/* BUTTONS */
+button {
+  padding: 10px 14px;
+  margin: 5px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  background: #4da3ff;
+  color: white;
+  font-weight: bold;
+}
+
+button:hover {
+  background: #2f85e6;
+}
+
+.mode {
+  font-size: 14px;
+  opacity: 0.8;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h2>🍅 Pomodoro</h2>
+  <div class="mode" id="modeText">Focus Mode</div>
+
+  <!-- RING -->
+  <div class="ring">
+    <svg width="200" height="200">
+      <circle class="bg" cx="100" cy="100" r="90"></circle>
+      <circle class="progress" cx="100" cy="100" r="90"></circle>
+    </svg>
+
+    <div id="timer">25:00</div>
+  </div>
+
+  <button onclick="startTimer()">▶ Start</button>
+  <button onclick="pauseTimer()">⏸ Pause</button>
+  <button onclick="resetTimer()">🔄 Reset</button>
+
+  <br>
+
+  <button onclick="setMode('focus')">Focus</button>
+  <button onclick="setMode('short')">Short Break</button>
+  <button onclick="setMode('long')">Long Break</button>
+
+</div>
+
+<audio id="beep">
+  <source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg">
+</audio>
+
+<script>
+
+let modes = {
+  focus: 25 * 60,
+  short: 5 * 60,
+  long: 15 * 60
+};
+
+let currentMode = "focus";
+let timeLeft = modes[currentMode];
+let totalTime = timeLeft;
+let timer = null;
+
+const timerEl = document.getElementById("timer");
+const modeText = document.getElementById("modeText");
+const progressCircle = document.querySelector(".progress");
+const beep = document.getElementById("beep");
+
+const radius = 90;
+const circumference = 2 * Math.PI * radius;
+
+progressCircle.style.strokeDasharray = circumference;
+
+/* UPDATE RING */
+function updateRing() {
+  const percent = timeLeft / totalTime;
+  const offset = circumference - (percent * circumference);
+  progressCircle.style.strokeDashoffset = offset;
+}
+
+/* DISPLAY */
+function updateDisplay() {
+  let m = Math.floor(timeLeft / 60);
+  let s = timeLeft % 60;
+  timerEl.innerText =
+    `${m.toString().padStart(2,"0")}:${s.toString().padStart(2,"0")}`;
+
+  updateRing();
+}
+
+/* MODE */
+function setMode(mode) {
+  currentMode = mode;
+  timeLeft = modes[mode];
+  totalTime = timeLeft;
+
+  modeText.innerText =
+    mode === "focus" ? "Focus Mode 🍅" :
+    mode === "short" ? "Short Break ☕" :
+    "Long Break 😌";
+
+  clearInterval(timer);
+  timer = null;
+
+  updateDisplay();
+}
+
+/* START */
+function startTimer() {
+  clearInterval(timer);
+
+  timer = setInterval(() => {
+    timeLeft--;
+
+    if (timeLeft <= 0) {
+      clearInterval(timer);
+      timer = null;
+
+      beep.play();
+      alert("Session complete!");
+
+      if (currentMode === "focus") {
+        setMode("short");
+      } else {
+        setMode("focus");
+      }
+    }
+
+    updateDisplay();
+  }, 1000);
+}
+
+/* PAUSE */
+function pauseTimer() {
+  clearInterval(timer);
+  timer = null;
+}
+
+/* RESET */
+function resetTimer() {
+  pauseTimer();
+  timeLeft = totalTime;
+  updateDisplay();
+}
+
+updateDisplay();
+
+</script>
+
+</body>
+</html>

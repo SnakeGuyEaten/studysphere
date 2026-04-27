@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Soundboard</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#0b0d12;
+  color:white;
+  text-align:center;
+}
+
+h1{
+  padding:15px;
+}
+
+#grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:15px;
+  padding:20px;
+}
+
+.sound{
+  background:#1a2030;
+  padding:20px;
+  border-radius:12px;
+  cursor:pointer;
+  transition:0.2s;
+}
+
+.sound:hover{
+  background:#2a3350;
+  transform:scale(1.05);
+}
+
+.locked{
+  opacity:0.4;
+  cursor:not-allowed;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🔊 Soundboard</h1>
+
+<div id="grid"></div>
+
+<script>
+
+/* ================= MODE ================= */
+const params = new URLSearchParams(window.location.search);
+const mode = params.get("mode") || "home";
+
+/* ================= SOUNDS ================= */
+/* Put your audio files in /games/soundboard/sounds/ */
+
+const sounds = [
+  { name: "Fahhh", file: "sounds/very-loud-fahhhhhhhhhhhhhhhhh.mp3", schoolSafe: false },
+  { name: "discord troll", file: "sounds/discord-troll.mp3", schoolSafe: false },
+  { name: "Goodbye", file: "sounds/please-dont-say-goodbye.mp3", schoolSafe: false },
+  { name: "Windows XP Error", file: "sounds/error.mp3", schoolSafe: true },
+  { name: "ACK", file: "sounds/ack.mp3", schoolSafe: true },
+  { name: "I can't prove it", file: "sounds/i-cant-prove-it.mp3", schoolSafe: false },
+  { name: "Vine boom", file: "sounds/vine-boom.mp3", schoolSafe: true },
+  { name: "Tiki Tiki Tiki", file: "sounds/tiki-tiki-phunk.mp3", schoolSafe: false },
+  { name: "Nokia Ringtone", file: "sounds/nokia-ringtone.mp3", schoolSafe: true },
+  { name: "Iphone Cat Ringtone", file: "sounds/iphone-cat-ringtone.mp3", schoolSafe: false },
+  { name: "Taco Bell Bong", file: "sounds/taco-bell-bong.mp3", schoolSafe: false },
+];
+
+const grid = document.getElementById("grid");
+
+/* ================= RENDER ================= */
+
+sounds.forEach(sound => {
+
+  const btn = document.createElement("div");
+  btn.className = "sound";
+  btn.innerText = sound.name;
+
+  const blockedInSchool = (mode === "school" && !sound.schoolSafe);
+
+  if (blockedInSchool) {
+    btn.classList.add("locked");
+    btn.innerText += " 🔒";
+  } else {
+    btn.onclick = () => {
+      new Audio(sound.file).play();
+    };
+  }
+
+  grid.appendChild(btn);
+});
+
+</script>
+
+</body>
+</html>
